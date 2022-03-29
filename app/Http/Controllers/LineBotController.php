@@ -48,28 +48,28 @@ class LineBotController extends Controller
 
         // 判斷訊息類別, 文字回傳相應資料
         switch ($replyType) {
-                // 文字訊息
+            // 文字訊息
             case 'text':
+                // help
+                if (Str::contains(Str::lower($text), 'help')) {
+                    $bot->replyText($replyToken, '輸入 天氣縣市 可查詢天氣' . "\n" . 'ex: 天氣 屏東縣');
+                }
+
+                // 天氣預報
                 if (Str::startsWith($text, '天氣') || Str::endsWith($text, '天氣')) {
-                    // 天氣預報
                     if (Str::startsWith($text, '天氣')) {
                         $city = trim(Str::after($text, '天氣'));
-                        $data = $this->weatherService->getCityWeather($city);
+                        $data = $this->weatherService->getWeather($city);
                         $templateMessageBuilder = $this->messageService->weatherTemplate($data);
                         $bot->replyMessage($replyToken, $templateMessageBuilder);
                     } else {
                         $city = trim(Str::before($text, '天氣'));
-                        $data = $this->weatherService->getCityWeather($city);
+                        $data = $this->weatherService->getWeather($city);
                         $templateMessageBuilder = $this->messageService->weatherTemplate($data);
                         $bot->replyMessage($replyToken, $templateMessageBuilder);
                     }
                 }
-
-                if (Str::contains($text, 'help')) {
-                    $bot->replyText($replyToken, '輸入 天氣縣市 可查詢天氣'."\n".'ex: 天氣 屏東縣');
-                }
-
-                // 預設回聲蟲
+            // 預設回聲蟲
             default:
                 $bot->replyText($replyToken, $text);
         }
