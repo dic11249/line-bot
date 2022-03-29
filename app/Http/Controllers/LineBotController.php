@@ -7,6 +7,7 @@ use App\Models\ShortUrl;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Services\MessageService;
@@ -60,9 +61,16 @@ class LineBotController extends Controller
                     $bot->replyText($replyToken, '輸入 天氣縣市 可查詢天氣' . "\n" . 'ex: 天氣 屏東縣');
                 }
 
+                if (trim($text)==='抽') {
+                    $short_url = DB::table('short_urls')->inRandomOrder()->first();
+                    $url = $this->shortUrlService->getShortUrl($short_url->id);
+                    $bot->replyText($replyToken, $url);
+                }
+
                 if (filter_var($text, FILTER_VALIDATE_URL)) {
                     $short_url = $this->shortUrlService->saveShortUrl($text);
-                    $bot->replyText($replyToken, $short_url);
+                    $url = $this->shortUrlService->getShortUrl($short_url->id);
+                    $bot->replyText($replyToken, $url);
                 }
 
                 // 天氣預報

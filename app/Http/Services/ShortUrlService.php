@@ -14,6 +14,12 @@ class ShortUrlService
         if (!$shortUrl) {
             $shortUrl = ShortUrl::create(['origin_url' => $url]);
         }
+        return $shortUrl;
+    }
+
+    public function getShortUrl($id)
+    {
+        $shortUrl = ShortUrl::find($id);
         return env('APP_URL').'/api/re/'.Hashids::encode($shortUrl->id);
     }
 }
