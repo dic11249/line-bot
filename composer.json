@@ -12,7 +12,8 @@
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
-        "linecorp/line-bot-sdk": "^7.3"
+        "linecorp/line-bot-sdk": "^7.3",
+        "vinkla/hashids": "^9.1"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.12",

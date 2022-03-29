@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use LINE\LINEBot;
+use App\Models\ShortUrl;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Services\MessageService;
 use App\Http\Services\WeatherService;
+use App\Http\Services\ShortUrlService;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot\MessageBuilder\TemplateMessageBuilder;
 use LINE\LINEBot\TemplateActionBuilder\PostbackTemplateActionBuilder;
@@ -19,11 +22,13 @@ class LineBotController extends Controller
 {
     protected $weatherService;
     protected $messageService;
+    protected $shortUrlService;
 
-    public function __construct(WeatherService $weatherService, MessageService $messageService)
+    public function __construct(WeatherService $weatherService, MessageService $messageService, ShortUrlService $shortUrlService)
     {
         $this->weatherService = $weatherService;
         $this->messageService = $messageService;
+        $this->shortUrlService = $shortUrlService;
         $this->accessToken = env('LINE_CHANNEL_ACCESS_TOKEN');
         $this->channelSecret = env('LINE_CHANNEL_SECRET');
     }
@@ -55,6 +60,11 @@ class LineBotController extends Controller
                     $bot->replyText($replyToken, '輸入 天氣縣市 可查詢天氣' . "\n" . 'ex: 天氣 屏東縣');
                 }
 
+                if (filter_var($text, FILTER_VALIDATE_URL)) {
+                    $short_url = $this->shortUrlService->saveShortUrl($text);
+                    $bot->replyText($replyToken, $short_url);
+                }
+
                 // 天氣預報
                 if (Str::startsWith($text, '天氣') || Str::endsWith($text, '天氣')) {
                     if (Str::startsWith($text, '天氣')) {
@@ -79,5 +89,21 @@ class LineBotController extends Controller
     {
         $result = $this->weatherService->getWeather($request->city, $request->time);
         return $result;
+    }
+
+    public function shortUrl(Request $request)
+    {
+        $short_url = ShortUrl::create($request->all());
+        $hashId = Hashids::encode($short_url->id);
+        return env('APP_URL').'/'.$hashId;
+    }
+
+    public function toShortUrl($id)
+    {
+        $short_id = Hashids::decode($id)[0];
+
+        $shortUrl = ShortUrl::find($short_id);
+
+        return redirect()->away($shortUrl->origin_url);
     }
 }
