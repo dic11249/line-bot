@@ -19,4 +19,5 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::get('/index', [LineBotController::class, 'index']);
+Route::post('/chat', [LineBotController::class, 'chat']);
+Route::post('/index', [LineBotController::class, 'index']);
