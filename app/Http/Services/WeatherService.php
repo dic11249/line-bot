@@ -34,6 +34,8 @@ class WeatherService
                 'city' => $city,
                 'time' => $Wx[$i]['startTime'],
                 'Wx' => $Wx[$i]['parameter']['parameterName'],
+                'WxImg' => $Wx[$i]['parameter']['parameterValue'],
+                'url' => 'https://www.cwb.gov.tw/V8/assets/img/weather_icons/weathers/svg_icon/day/'.str_pad($Wx[$i]['parameter']['parameterValue'], 2,'0', STR_PAD_LEFT).'.svg',
                 'PoP' => $PoP[$i]['parameter']['parameterName'] . '%',
                 'Tem' => $MinT[$i]['parameter']['parameterName'] . '℃-' . $MaxT[$i]['parameter']['parameterName'] . '℃'
             ];
