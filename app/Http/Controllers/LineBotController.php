@@ -91,18 +91,19 @@ class LineBotController extends Controller
                     if (Str::startsWith($text, '天氣')) {
                         $city = trim(Str::after($text, '天氣'));
                         $data = $this->weatherService->getWeather($city);
-                        if ($data==='error') {
-                            $bot->replyText($replyToken, '縣市 輸入錯誤 請重新輸入');
+
+                        if (is_string($data)) {
+                            $bot->replyText($replyToken, '縣市 '.$data.' 輸入錯誤 請重新輸入');
                         } else {
                             $templateMessageBuilder = $this->messageService->weatherTemplate($data);
                             $bot->replyMessage($replyToken, $templateMessageBuilder);
                         }
-
                     } else {
                         $city = trim(Str::before($text, '天氣'));
                         $data = $this->weatherService->getWeather($city);
-                        if ($data==='error') {
-                            $bot->replyText($replyToken, '縣市 輸入錯誤 請重新輸入');
+
+                        if (is_string($data)) {
+                            $bot->replyText($replyToken, '縣市 「'.$data.'」 輸入錯誤');
                         } else {
                             $templateMessageBuilder = $this->messageService->weatherTemplate($data);
                             $bot->replyMessage($replyToken, $templateMessageBuilder);

@@ -18,7 +18,7 @@ class WeatherService
         $city = Str::replace('台','臺',$city);
 
         if (!Arr::exists($this->cityArr, $city)) {
-            return 'error';
+            return $city;
         }
 
         $response = Http::get(env('OPEN_DATA_BASE_URL') . '/v1/rest/datastore/F-C0032-001', [
