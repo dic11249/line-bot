@@ -7,6 +7,7 @@ use App\Models\ShortUrl;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Vinkla\Hashids\Facades\Hashids;
@@ -14,7 +15,9 @@ use App\Http\Services\MessageService;
 use App\Http\Services\WeatherService;
 use App\Http\Services\ShortUrlService;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
+use LINE\LINEBot\Exception\InvalidSignatureException;
 use LINE\LINEBot\MessageBuilder\TemplateMessageBuilder;
+use LINE\LINEBot\Exception\InvalidEventRequestException;
 use LINE\LINEBot\TemplateActionBuilder\PostbackTemplateActionBuilder;
 use LINE\LINEBot\MessageBuilder\TemplateBuilder\CarouselTemplateBuilder;
 use LINE\LINEBot\MessageBuilder\TemplateBuilder\CarouselColumnTemplateBuilder;
@@ -39,6 +42,15 @@ class LineBotController extends Controller
         $httpClient = new CurlHTTPClient($this->accessToken);
         $bot = new LINEBot($httpClient, ['channelSecret' => $this->channelSecret]);
 
+        //檢查header
+        try {
+            $bot->parseEventRequest($request->getContent(), $request->header('X-Line-Signature'));
+        }catch (InvalidSignatureException $exception){
+            return response('An exception class that is raised when signature is invalid.',Response::HTTP_FORBIDDEN);
+        }catch (InvalidEventRequestException $exception){
+            return response('An exception class that is raised when received invalid event request.',Response::HTTP_FORBIDDEN);
+        }
+
         // LINE BOT回傳資料
         $events = $request->events;
         Log::info($events[0]);
@@ -54,14 +66,14 @@ class LineBotController extends Controller
 
         // 判斷訊息類別, 文字回傳相應資料
         switch ($replyType) {
-            // 文字訊息
+                // 文字訊息
             case 'text':
                 // help
                 if (Str::contains(Str::lower($text), 'help')) {
                     $bot->replyText($replyToken, '輸入 天氣縣市 可查詢天氣' . "\n" . 'ex: 天氣 屏東縣');
                 }
 
-                if (trim($text)==='抽') {
+                if (trim($text) === '抽') {
                     $short_url = DB::table('short_urls')->inRandomOrder()->first();
                     $url = $this->shortUrlService->getShortUrl($short_url->id);
                     $bot->replyText($replyToken, $url);
@@ -87,7 +99,7 @@ class LineBotController extends Controller
                         $bot->replyMessage($replyToken, $templateMessageBuilder);
                     }
                 }
-            // 預設回聲蟲
+                // 預設回聲蟲
             default:
                 $bot->replyText($replyToken, $text);
         }
@@ -103,7 +115,7 @@ class LineBotController extends Controller
     {
         $short_url = ShortUrl::create($request->all());
         $hashId = Hashids::encode($short_url->id);
-        return env('APP_URL').'/'.$hashId;
+        return env('APP_URL') . '/' . $hashId;
     }
 
     public function toShortUrl($id)
