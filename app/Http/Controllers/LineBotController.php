@@ -68,6 +68,7 @@ class LineBotController extends Controller
         switch ($replyType) {
                 // 文字訊息
             case 'text':
+                $text = trim($text);
                 // help
                 if (Str::contains(Str::lower($text), 'help')) {
                     $bot->replyText($replyToken, '輸入 天氣縣市 可查詢天氣' . "\n" . 'ex: 天氣 屏東縣');
@@ -90,13 +91,22 @@ class LineBotController extends Controller
                     if (Str::startsWith($text, '天氣')) {
                         $city = trim(Str::after($text, '天氣'));
                         $data = $this->weatherService->getWeather($city);
-                        $templateMessageBuilder = $this->messageService->weatherTemplate($data);
-                        $bot->replyMessage($replyToken, $templateMessageBuilder);
+                        if ($data==='error') {
+                            $bot->replyText($replyToken, '縣市 輸入錯誤 請重新輸入');
+                        } else {
+                            $templateMessageBuilder = $this->messageService->weatherTemplate($data);
+                            $bot->replyMessage($replyToken, $templateMessageBuilder);
+                        }
+
                     } else {
                         $city = trim(Str::before($text, '天氣'));
                         $data = $this->weatherService->getWeather($city);
-                        $templateMessageBuilder = $this->messageService->weatherTemplate($data);
-                        $bot->replyMessage($replyToken, $templateMessageBuilder);
+                        if ($data==='error') {
+                            $bot->replyText($replyToken, '縣市 輸入錯誤 請重新輸入');
+                        } else {
+                            $templateMessageBuilder = $this->messageService->weatherTemplate($data);
+                            $bot->replyMessage($replyToken, $templateMessageBuilder);
+                        }
                     }
                 }
                 // 預設回聲蟲
