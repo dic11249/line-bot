@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\WeatherResource;
 use LINE\LINEBot;
 use App\Models\ShortUrl;
 use Illuminate\Support\Arr;
@@ -119,7 +120,7 @@ class LineBotController extends Controller
     public function index(Request $request)
     {
         $result = $this->weatherService->getWeather($request->city, $request->time);
-        return $result;
+        return WeatherResource::collection($result);
     }
 
     public function shortUrl(Request $request)

@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::post('/chat', [LineBotController::class, 'chat']);
-Route::post('/index', [LineBotController::class, 'index']);
+Route::get('/index', [LineBotController::class, 'index']);
 Route::post('/short-url', [LineBotController::class, 'shortUrl']);
 
 Route::get('/re/{id}', [LineBotController::class, 'toShortUrl']);
