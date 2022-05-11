@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Contracts\File;
+use App\Http\Services\FileService;
+// use GreatTree\Base\Services\FileService;
 use Illuminate\Support\ServiceProvider;
+// use GreatTree\Base\Contracts\Services\File as FileContracts;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(File::class, FileService::class);
     }
 
     /**
